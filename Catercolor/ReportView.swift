@@ -14,6 +14,20 @@ struct ReportView: View {
     let gameResults: GameResult
     let diagnosis: String
     let caterpillarStates: [Caterpillar]
+    
+    @ViewBuilder
+    func mistakeRow(color: Color, label: String, count: Int) -> some View {
+        HStack {
+            Circle()
+                .fill(color)
+                .frame(width: 20, height: 20)
+            Text(label)
+                .bold()
+            Spacer()
+            Text("\(count)")
+                .bold()
+        }
+    }
 
     var body: some View {
         VStack(spacing: 20) {
@@ -39,13 +53,15 @@ struct ReportView: View {
             }
 
             // Results
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 10) {
                 Text("Results").font(.headline)
-                Text("Red mistakes: \(gameResults.incorrectMatches[.red, default: 0])")
-                Text("Green mistakes: \(gameResults.incorrectMatches[.green, default: 0])")
-                Text("Blue mistakes: \(gameResults.incorrectMatches[.blue, default: 0])")
-                Text("Yellow mistakes: \(gameResults.incorrectMatches[.yellow, default: 0])")
+
+                mistakeRow(color: .red, label: "Red mistakes:", count: gameResults.incorrectMatches[.red, default: 0])
+                mistakeRow(color: .green, label: "Green mistakes:", count: gameResults.incorrectMatches[.green, default: 0])
+                mistakeRow(color: .blue, label: "Blue mistakes:", count: gameResults.incorrectMatches[.blue, default: 0])
+                mistakeRow(color: .yellow, label: "Yellow mistakes:", count: gameResults.incorrectMatches[.yellow, default: 0])
             }
+
 
             Text(diagnosis)
                 .font(.title3)

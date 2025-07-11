@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-/*
+
 extension View {
     func exportAsPDF(to url: URL) {
         #if os(iOS)
@@ -25,17 +25,29 @@ extension View {
         view?.bounds = CGRect(origin: .zero, size: targetSize)
         view?.backgroundColor = .clear
 
+        // Add to a window to make sure layout is resolved
+        let window = UIWindow(frame: CGRect(origin: .zero, size: targetSize))
+        window.rootViewController = controller
+        window.makeKeyAndVisible()
+        window.layoutIfNeeded()
+
+        let renderer = UIGraphicsImageRenderer(size: targetSize)
+
+        let image = renderer.image { ctx in
+            view?.drawHierarchy(in: controller.view.bounds, afterScreenUpdates: true)
+        }
+
         let pdfRenderer = UIGraphicsPDFRenderer(bounds: CGRect(origin: .zero, size: targetSize))
 
         do {
             try pdfRenderer.writePDF(to: url, withActions: { context in
                 context.beginPage()
-                view?.layer.render(in: context.cgContext)
+                image.draw(in: CGRect(origin: .zero, size: targetSize))
             })
-            print("PDF successfully written on iOS at \(url)")
+            print("✅ PDF successfully written at \(url)")
         } catch {
-            print("Could not create PDF file on iOS: \(error)")
+            print("❌ Could not create PDF file: \(error)")
         }
     }
+
 }
- */

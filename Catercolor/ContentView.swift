@@ -277,7 +277,35 @@ struct ContentView: View {
             .padding(.top, 20)
             
             Button(action: {
-                // TODO: Add Download Report logic here
+                // 1️⃣ Create the report view
+                let reportView = ReportView(
+                    childName: childName,
+                    childAge: childAge,
+                    date: todaysDate,
+                    gameResults: gameResults,
+                    diagnosis: diagnosisMessage(),
+                    caterpillarStates: caterpillarStates
+                )
+
+                // 2️⃣ Get a file URL to save
+                let fileName = "Catercolor_Report_\(childName)_\(todaysDate).pdf"
+                let tempDir = FileManager.default.temporaryDirectory
+                let fileURL = tempDir.appendingPathComponent(fileName)
+
+                // 3️⃣ Export as PDF
+                reportView.exportAsPDF(to: fileURL)
+
+                // 4️⃣ Show share sheet safely
+                let activityVC = UIActivityViewController(activityItems: [fileURL], applicationActivities: nil)
+                if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                   let rootVC = scene.windows.first?.rootViewController {
+                    if let popover = activityVC.popoverPresentationController {
+                        popover.sourceView = rootVC.view
+                        popover.sourceRect = CGRect(x: rootVC.view.bounds.midX, y: rootVC.view.bounds.midY, width: 0, height: 0)
+                        popover.permittedArrowDirections = []
+                    }
+                    rootVC.present(activityVC, animated: true, completion: nil)
+                }
             }) {
                 Text("Download Report")
                     .fontWeight(.bold)
@@ -285,6 +313,8 @@ struct ContentView: View {
                     .frame(maxWidth: 250, minHeight: 50)
                     .background(RoundedRectangle(cornerRadius: 20).fill(Color.gray))
             }
+
+
             .buttonStyle(PlainButtonStyle())
             .padding(.top, 10)
         }
