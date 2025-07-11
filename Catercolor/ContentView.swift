@@ -7,6 +7,8 @@ struct ContentView: View {
     @State private var isGameRunning = false
     @State private var showSummary = false
     @State private var showCaterpillarAnimation = false
+    @State private var ballPosition: CGPoint = .zero
+    @State private var caterpillarFrames: [CaterpillarColor: CGRect] = [:]
     @State private var animationStates: [CaterpillarAnimationState] = CaterpillarColor.allCases.map { _ in
         CaterpillarAnimationState()
     }
@@ -109,13 +111,33 @@ struct ContentView: View {
 
             Spacer()
 
-            Circle()
-                .fill(currentBall.color)
-                .frame(width: 60, height: 60)
-                .onDrag {
-                    NSItemProvider(object: "topBall:\(currentBall.correctCaterpillar.rawValue)" as NSString)
-                }
-                .padding()
+            GeometryReader { globalGeo in
+                Circle()
+                    .fill(currentBall.color)
+                    .frame(width: 60, height: 60)
+                    .position(ballPosition == .zero ? CGPoint(x: globalGeo.size.width / 2, y: globalGeo.size.height / 3) : ballPosition)
+                    .gesture(
+                        DragGesture()
+                            .onChanged { value in
+                                ballPosition = value.location
+                            }
+                            .onEnded { value in
+                                // Convert local to global point
+                                let globalPoint = CGPoint(
+                                    x: value.location.x + globalGeo.frame(in: .global).minX,
+                                    y: value.location.y + globalGeo.frame(in: .global).minY
+                                )
+                                checkBallDrop(at: globalPoint)
+                                ballPosition = .zero
+                            }
+                    )
+                    .onAppear {
+                        ballPosition = CGPoint(x: globalGeo.size.width / 2, y: globalGeo.size.height / 3)
+                    }
+            }
+            .frame(height: 200)
+
+
 
             Spacer()
 
@@ -124,10 +146,19 @@ struct ContentView: View {
                     Spacer()
                     VStack {
                         VStack(spacing: -10) {
-                            Image("\(caterpillar.color.rawValue)")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 100, height: 100)
+                            GeometryReader { catGeo in
+                                Image("\(caterpillar.color.rawValue)")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 100, height: 100)
+                                    .onAppear {
+                                        caterpillarFrames[caterpillar.color] = catGeo.frame(in: .global)
+                                    }
+                                    .onChange(of: ballPosition) {
+                                        caterpillarFrames[caterpillar.color] = catGeo.frame(in: .global)
+                                    }
+                            }
+                            .frame(width: 100, height: 100)
 
                             ForEach(caterpillar.segments.reversed()) { segment in
                                 Circle()
@@ -139,15 +170,17 @@ struct ContentView: View {
                             }
                         }
                         .padding(30)
-                        .contentShape(Rectangle())
+                        .contentShape(Rectangle())  // <- makes entire VStack tappable
                         .onDrop(of: [.plainText], isTargeted: nil) { providers in
                             handleDrop(providers: providers, to: caterpillar.color)
                         }
                     }
                     Spacer()
                 }
+
             }
             .padding()
+
         }
     }
 
@@ -301,19 +334,16 @@ struct ContentView: View {
     func handleDrop(providers: [NSItemProvider], to targetCaterpillar: CaterpillarColor) -> Bool {
         for provider in providers {
             provider.loadItem(forTypeIdentifier: "public.plain-text", options: nil) { item, _ in
-                if let data = item as? Data, let str = String(data: data, encoding: .utf8) {
+                if let str = item as? String {
                     DispatchQueue.main.async {
-                        if str.starts(with: "topBall:") {
-                            let colorStr = str.replacingOccurrences(of: "topBall:", with: "")
-                            if let sourceCaterpillar = CaterpillarColor(rawValue: colorStr) {
-                                processTopBallDrop(to: targetCaterpillar, from: sourceCaterpillar)
-                            }
-                        } else if str.starts(with: "segment:") {
-                            let segmentID = str.replacingOccurrences(of: "segment:", with: "")
-                            moveSegment(withId: segmentID, to: targetCaterpillar)
-                        }
+                        processDropString(str, to: targetCaterpillar)
+                    }
+                } else if let data = item as? Data, let str = String(data: data, encoding: .utf8) {
+                    DispatchQueue.main.async {
+                        processDropString(str, to: targetCaterpillar)
                     }
                 }
+
             }
         }
         return true
@@ -356,6 +386,27 @@ struct ContentView: View {
 
     func checkCaterpillarsFull() -> Bool {
         return caterpillarStates.allSatisfy { $0.segments.count >= 10 }
+    }
+    
+    func processDropString(_ str: String, to targetCaterpillar: CaterpillarColor) {
+        if str.starts(with: "topBall:") {
+            let colorStr = str.replacingOccurrences(of: "topBall:", with: "")
+            if let sourceCaterpillar = CaterpillarColor(rawValue: colorStr) {
+                processTopBallDrop(to: targetCaterpillar, from: sourceCaterpillar)
+            }
+        } else if str.starts(with: "segment:") {
+            let segmentID = str.replacingOccurrences(of: "segment:", with: "")
+            moveSegment(withId: segmentID, to: targetCaterpillar)
+        }
+    }
+
+    func checkBallDrop(at point: CGPoint) {
+        for (color, frame) in caterpillarFrames {
+            if frame.contains(point) {
+                processTopBallDrop(to: color, from: currentBall.correctCaterpillar)
+                return
+            }
+        }
     }
 
     func endGame() {
