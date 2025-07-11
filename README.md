@@ -1,8 +1,3 @@
-Absolutely! Here’s a polished **README.md** in Markdown format you can copy-paste — I also included placeholders where you can insert screenshots later.
-
----
-
-````markdown
 # Catercolor 🎨🐛
 
 Catercolor is a fun and interactive iOS/iPadOS/macOS app designed to help assess **color vision abilities in children** through an engaging drag-and-drop game.
@@ -102,5 +97,3 @@ It is **not a medical diagnostic tool**. If you suspect a child has a color visi
 ## 💛 Created by
 
 Jennifer Warbeck — July 2025
-
-```
