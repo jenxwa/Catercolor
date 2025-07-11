@@ -31,22 +31,30 @@ Players drag colored balls to the correct caterpillar and build up caterpillar s
 ## 🖼 Interface Preview
 
 ### Start Screen
-![Start Screen](screenshots/start_screen.png)
+<p align="center">
+  <img src="Catercolor/screenshots/start_screen.png" width="50%">
+</p>
 
 ---
 
 ### Gameplay Screen
-![Gameplay Screen](screenshots/gameplay_screen.png)
+<p align="center">
+  <img src="Catercolor/screenshots/gameplay_screen.png" width="50%">
+</p>
 
 ---
 
 ### Summary Screen
-![Summary Screen](screenshots/summary_screen.png)
+<p align="center">
+  <img src="Catercolor/screenshots/summary_screen.png" width="50%">
+</p>
 
 ---
 
 ### PDF Report Example
-![PDF Report](screenshots/pdf_report.png)
+<p align="center">
+  <img src="Catercolor/screenshots/pdf_report.png" width="50%">
+</p>
 
 ---
 
