@@ -105,3 +105,9 @@ It is **not a medical diagnostic tool**. If you suspect a child has a color visi
 ## 💛 Created by
 
 Jennifer Warbeck — July 2025
+
+This project and its contents are the intellectual property of the repository owner.
+Copying, redistributing, or using this project (or parts of it) without explicit permission is not allowed.
+All rights reserved.
+
+If you are interested in using or building upon this project, please contact me to discuss licensing or collaboration.
